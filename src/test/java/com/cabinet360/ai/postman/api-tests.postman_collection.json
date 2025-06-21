@@ -1,0 +1,269 @@
+{
+  "info": {
+    "name": "Cabinet360 AI-Service (Role-Based Collection)",
+    "_postman_id": "cabinet360-ai-service-collection",
+    "description": "Role-based Postman tests for Cabinet360 AI microservice (chatbot + PubMed + health)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Doctor",
+      "item": [
+        {
+          "name": "Chatbot - Send Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token_doctor}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Quels sont les traitements récents du diabète ?\",\n  \"conversationId\": null,\n  \"medicalContext\": \"Patient : homme, 45 ans, diabète de type 2\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/v1/ai/chatbot/chat", "host": [ "{{base_url}}" ], "path": [ "api", "v1", "ai", "chatbot", "chat" ] }
+          }
+        },
+        {
+          "name": "Chatbot - List Conversations",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token_doctor}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/ai/chatbot/conversations", "host": [ "{{base_url}}" ], "path": [ "api", "v1", "ai", "chatbot", "conversations" ] }
+          }
+        },
+        {
+          "name": "Chatbot - Get Conversation Messages",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token_doctor}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/ai/chatbot/conversations/1/messages", "host": [ "{{base_url}}" ], "path": [ "api", "v1", "ai", "chatbot", "conversations", "1", "messages" ] }
+          }
+        },
+        {
+          "name": "Chatbot - Delete Conversation",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token_doctor}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/ai/chatbot/conversations/1", "host": [ "{{base_url}}" ], "path": [ "api", "v1", "ai", "chatbot", "conversations", "1" ] }
+          }
+        },
+        {
+          "name": "PubMed - Search Articles",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token_doctor}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"diabetes treatment 2024\",\n  \"maxResults\": 10,\n  \"patientContext\": \"45yo male with T2DM\",\n  \"specialty\": \"endocrinology\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/v1/ai/pubmed/search", "host": [ "{{base_url}}" ], "path": [ "api", "v1", "ai", "pubmed", "search" ] }
+          }
+        },
+        {
+          "name": "PubMed - Quick Search",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token_doctor}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/pubmed/quick-search?query=diabetes&maxResults=5",
+              "host": [ "{{base_url}}" ],
+              "path": [ "api", "v1", "ai", "pubmed", "quick-search" ],
+              "query": [
+                { "key": "query", "value": "diabetes" },
+                { "key": "maxResults", "value": "5" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "PubMed - Search History",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token_doctor}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/pubmed/search/history?limit=20",
+              "host": [ "{{base_url}}" ],
+              "path": [ "api", "v1", "ai", "pubmed", "search", "history" ],
+              "query": [
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Chatbot - Send Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token_admin}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Quels sont les traitements récents du diabète ?\",\n  \"conversationId\": null,\n  \"medicalContext\": \"Patient : homme, 45 ans, diabète de type 2\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/v1/ai/chatbot/chat", "host": [ "{{base_url}}" ], "path": [ "api", "v1", "ai", "chatbot", "chat" ] }
+          }
+        },
+        {
+          "name": "Chatbot - List Conversations",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token_admin}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/ai/chatbot/conversations", "host": [ "{{base_url}}" ], "path": [ "api", "v1", "ai", "chatbot", "conversations" ] }
+          }
+        },
+        {
+          "name": "Chatbot - Get Conversation Messages",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token_admin}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/ai/chatbot/conversations/1/messages", "host": [ "{{base_url}}" ], "path": [ "api", "v1", "ai", "chatbot", "conversations", "1", "messages" ] }
+          }
+        },
+        {
+          "name": "Chatbot - Delete Conversation",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token_admin}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/ai/chatbot/conversations/1", "host": [ "{{base_url}}" ], "path": [ "api", "v1", "ai", "chatbot", "conversations", "1" ] }
+          }
+        },
+        {
+          "name": "PubMed - Search Articles",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token_admin}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"diabetes treatment 2024\",\n  \"maxResults\": 10,\n  \"patientContext\": \"45yo male with T2DM\",\n  \"specialty\": \"endocrinology\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/v1/ai/pubmed/search", "host": [ "{{base_url}}" ], "path": [ "api", "v1", "ai", "pubmed", "search" ] }
+          }
+        },
+        {
+          "name": "PubMed - Quick Search",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token_admin}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/pubmed/quick-search?query=diabetes&maxResults=5",
+              "host": [ "{{base_url}}" ],
+              "path": [ "api", "v1", "ai", "pubmed", "quick-search" ],
+              "query": [
+                { "key": "query", "value": "diabetes" },
+                { "key": "maxResults", "value": "5" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "PubMed - Search History",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token_admin}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/pubmed/search/history?limit=20",
+              "host": [ "{{base_url}}" ],
+              "path": [ "api", "v1", "ai", "pubmed", "search", "history" ],
+              "query": [
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Assistant",
+      "item": [
+        {
+          "name": "Chatbot - Send Message (Should Fail)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token_assistant}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Test message for Assistant\",\n  \"conversationId\": null,\n  \"medicalContext\": \"Context info\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/v1/ai/chatbot/chat", "host": [ "{{base_url}}" ], "path": [ "api", "v1", "ai", "chatbot", "chat" ] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Patient",
+      "item": [
+        {
+          "name": "Chatbot - Send Message (Should Fail)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token_patient}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Test message for Patient\",\n  \"conversationId\": null,\n  \"medicalContext\": \"Context info\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/v1/ai/chatbot/chat", "host": [ "{{base_url}}" ], "path": [ "api", "v1", "ai", "chatbot", "chat" ] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Public",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/v1/ai/health", "host": [ "{{base_url}}" ], "path": [ "api", "v1", "ai", "health" ] }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8100" },
+    { "key": "jwt_token_doctor", "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkb2MxQGNhYmluZXQzNjAuY29tIiwicm9sZSI6IkRPQ1RPUiIsInVzZXJJZCI6OCwiaWF0IjoxNzUwMzg5NTE1LCJleHAiOjE3NTA0NzU5MTV9.E0jOxoSlHqm0q9o206Qq9msiArJSDSjUxOnKdJE1ZSk" },
+    { "key": "jwt_token_admin", "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBjYWJpbmV0MzYwLmNvbSIsInJvbGUiOiJBRE1JTiIsInVzZXJJZCI6MiwiaWF0IjoxNzUwMzg5MzQ0LCJleHAiOjE3NTA0NzU3NDR9.W2qvOih6RzAHv3tddkaUVOp7mVe5Vv6ILfUDWb7x5zE" },
+    { "key": "jwt_token_assistant", "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhc3Npc3RhbnRAY2FiaW5ldDM2MC5jb20iLCJyb2xlIjoiQVNTSVNUQU5UIiwidXNlcklkIjozLCJpYXQiOjE3NTAzODk1OTIsImV4cCI6MTc1MDQ3NTk5Mn0.T9ZaJfGNECsw3Y4IqKVdej4ubT2NM9AviQVqJHW9I6E" },
+    { "key": "jwt_token_patient", "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJwYXRpZW50QGNhYmluZXQzNjAuY29tIiwicm9sZSI6IlBBVElFTlQiLCJ1c2VySWQiOjMsImlhdCI6MTc1MDM4OTY0NCwiZXhwIjoxNzUwNDc2MDQ0fQ.BePiSdUxWrmxw12SP3dvWsyfM-rdWOl2Fpc4OHtjjKQ" }
+  ]
+}
