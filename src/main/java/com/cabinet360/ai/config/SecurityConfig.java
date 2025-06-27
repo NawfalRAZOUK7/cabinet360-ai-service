@@ -31,7 +31,8 @@ public class SecurityConfig {
                                 "/api/v1/ai/health",
                                 "/api/v1/ai/info",
                                 "/swagger-ui/**",
-                                "/v3/api-docs/**"
+                                "/v3/api-docs/**",
+                                "/health"
                         ).permitAll()
                         .requestMatchers("/api/v1/ai/chatbot/**").hasAnyRole("DOCTOR", "ADMIN")
                         .requestMatchers("/api/v1/ai/pubmed/**").hasAnyRole("DOCTOR", "ADMIN")

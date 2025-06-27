@@ -22,6 +22,20 @@ public class HealthController {
         ));
     }
 
+    // AJOUTE CE MAPPING À LA RACINE !
+    @RestController
+    public class RootHealthController {
+        @GetMapping("/health")
+        public ResponseEntity<Map<String, Object>> rootHealth() {
+            return ResponseEntity.ok(Map.of(
+                    "status", "UP",
+                    "service", "ai-service",
+                    "timestamp", LocalDateTime.now(),
+                    "version", "1.0.0"
+            ));
+        }
+    }
+
     @GetMapping("/info")
     public ResponseEntity<Map<String, Object>> info() {
         return ResponseEntity.ok(Map.of(
