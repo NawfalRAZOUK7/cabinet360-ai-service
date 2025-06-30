@@ -122,7 +122,7 @@ core:
 # AI Provider Configuration
 # ---------------------------
 ai:
-  provider: ${AI_PROVIDER:huggingface}
+  provider: ${AI_PROVIDER:gemini}
   huggingface:
     model: ${AI_MODEL:microsoft/DialoGPT-medium}
     medical:
