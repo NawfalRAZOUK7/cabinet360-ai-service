@@ -1,5 +1,5 @@
 # ==========================================
-# Cabinet360 AI Service Configuration
+# Cabinet360 AI Service Configuration - ENHANCED WITH MEDICAL AI
 # ==========================================
 
 # ---------------------------
@@ -44,14 +44,33 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          lob:
+            non_contextual_creation: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
   # ---------------------------
-  # Cache Configuration
+  # Liquibase for database migrations
+  # ---------------------------
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: ${LIQUIBASE_ENABLED:false}
+
+  # ---------------------------
+  # Enhanced Cache Configuration
   # ---------------------------
   cache:
     type: simple
-    cache-names: ai-responses,article-summaries,pubmed-searches
+    cache-names:
+      - ai-responses
+      - article-summaries
+      - pubmed-searches
+      - drug-interactions
+      - differential-diagnoses
+      - medical-guidelines
+      - medical-usage-analytics
+      - medical-accuracy-metrics
+      - clinical-decisions
 
   # ---------------------------
   # Security Configuration
@@ -80,10 +99,12 @@ spring:
 # Server Configuration
 # ---------------------------
 server:
-  port: ${PORT:8080}
+  port: ${PORT:8082}
   error:
     include-message: always
     include-binding-errors: always
+  servlet:
+    context-path: /
 
 # ---------------------------
 # Logging Configuration
@@ -93,6 +114,7 @@ logging:
     org.hibernate.SQL: ${LOG_SQL:DEBUG}
     org.hibernate.type.descriptor.sql.BasicBinder: ${LOG_SQL_PARAMS:TRACE}
     com.cabinet360.ai: DEBUG
+    org.springframework.web.reactive.function.client: ${LOG_LEVEL_WEBCLIENT:WARN}
     root: ${LOG_LEVEL:INFO}
   pattern:
     console: '%d{yyyy-MM-dd HH:mm:ss} - %msg%n'
@@ -119,11 +141,13 @@ core:
     url: ${CORE_SERVICE_URL:http://core-service:8080}
 
 # ---------------------------
-# AI Provider Configuration
+# ENHANCED AI Provider Configuration
 # ---------------------------
 ai:
   provider: ${AI_PROVIDER:gemini}
   huggingface:
+    api:
+      key: ${HUGGINGFACE_API_KEY:}
     model: ${AI_MODEL:microsoft/DialoGPT-medium}
     medical:
       model: ${AI_MEDICAL_MODEL:dmis-lab/biobert-base-cased-v1.1}
@@ -135,18 +159,123 @@ ai:
     max-attempts: ${AI_RETRY_MAX:3}
     delay:
       seconds: ${AI_RETRY_DELAY:2}
+
+  # ====================================
+  # ENHANCED MEDICAL AI CONFIGURATION
+  # ====================================
   medical:
     system:
-      prompt: "You are a helpful medical AI assistant. Provide evidence-based medical information. Always recommend consulting healthcare professionals for medical decisions."
-    disclaimer: "Please consult with a healthcare professional for personalized medical advice."
+      prompt: |
+        You are an advanced medical AI assistant designed to help healthcare professionals with evidence-based medical information and clinical decision support.
+        
+        YOUR ROLE AND CAPABILITIES:
+        - Provide accurate, evidence-based medical information
+        - Assist with clinical reasoning and differential diagnosis
+        - Support treatment planning with current guidelines
+        - Analyze medical literature and research
+        - Help with drug interaction checking
+        - Provide clinical context and safety considerations
+        
+        RESPONSE STRUCTURE:
+        When responding to medical queries, structure your responses as follows:
+        
+        🔍 CLINICAL ASSESSMENT:
+        - Analyze the clinical presentation
+        - Consider relevant pathophysiology
+        - Identify key clinical features
+        
+        🎯 DIFFERENTIAL CONSIDERATIONS:
+        - List possible diagnoses in order of likelihood
+        - Explain supporting and distinguishing features
+        - Consider common and serious conditions
+        
+        📋 DIAGNOSTIC APPROACH:
+        - Suggest appropriate investigations
+        - Recommend diagnostic criteria or scoring systems
+        - Consider differential testing strategies
+        
+        💊 MANAGEMENT OPTIONS:
+        - Provide evidence-based treatment recommendations
+        - Include first-line and alternative therapies
+        - Consider contraindications and drug interactions
+        
+        ⚠️ SAFETY CONSIDERATIONS:
+        - Identify red flags or warning signs
+        - Recommend when to seek immediate care
+        - Highlight potential complications
+        
+        📚 EVIDENCE LEVEL:
+        - Reference current guidelines when applicable
+        - Note strength of evidence (RCT, systematic reviews, etc.)
+        - Mention recent updates or controversies
+        
+        🔄 FOLLOW-UP:
+        - Suggest monitoring parameters
+        - Recommend specialist referral criteria
+        - Provide patient counseling points
+        
+        IMPORTANT DISCLAIMERS:
+        - Always emphasize that this is clinical decision support, not a replacement for clinical judgment
+        - Recommend consulting with appropriate specialists for complex cases
+        - Stress the importance of considering individual patient factors
+        - Remind to verify drug dosing and contraindications independently
+        
+        SAFETY PROTOCOLS:
+        - If emergency symptoms are described, immediately recommend urgent medical evaluation
+        - For medication queries, always suggest verifying with clinical pharmacist
+        - When uncertain, clearly state limitations and recommend further consultation
+
+    disclaimer: "This AI-generated information is for clinical decision support only. Always consult with qualified healthcare professionals for definitive medical decisions."
+
+    emergency:
+      keywords: "chest pain,difficulty breathing,shortness of breath,severe bleeding,unconscious,stroke symptoms,cardiac arrest,anaphylaxis,severe allergic reaction,severe trauma,overdose,seizure,heart attack"
+      response: "🚨 EMERGENCY SITUATION DETECTED 🚨\n\nThis appears to describe a potential medical emergency. Please:\n1. Call emergency services immediately (911/999)\n2. Seek immediate medical attention\n3. Do not delay treatment\n\nThis AI cannot provide emergency medical care. Professional medical evaluation is urgently required."
+
+    specialties:
+      cardiology:
+        prompt: "Focus on cardiovascular conditions, cardiac risk factors, ECG interpretation, and heart failure management. Consider ASCVD risk, CHA2DS2-VASc scoring, and current ACC/AHA guidelines."
+      neurology:
+        prompt: "Emphasize neurological examination findings, differential diagnosis of neurological symptoms, stroke protocols, and NIHSS scoring."
+      psychiatry:
+        prompt: "Consider mental health assessments, psychiatric medications, suicide risk evaluation, and safety assessments."
+      pediatrics:
+        prompt: "Apply pediatric-specific considerations, age-appropriate dosing, developmental factors, and pediatric vital sign norms."
+      geriatrics:
+        prompt: "Consider geriatric syndromes, polypharmacy interactions, age-related physiological changes, and fall risk assessments."
+      emergency:
+        prompt: "Focus on emergency triage, rapid assessment protocols, emergency procedures, and time-sensitive interventions."
+      family:
+        prompt: "Consider primary care management, preventive care guidelines, family dynamics, and comprehensive care coordination."
+      internal:
+        prompt: "Focus on internal medicine conditions, complex medical management, and multisystem disease interactions."
+
+    drug_interaction:
+      enabled: ${DRUG_INTERACTION_AI_ENABLED:true}
+      confidence_threshold: ${DRUG_INTERACTION_CONFIDENCE:0.7}
+      severity_levels: "MAJOR,MODERATE,MINOR"
+
+    clinical_decision:
+      enabled: ${CLINICAL_DECISION_AI_ENABLED:true}
+      evidence_levels: "HIGH,MODERATE,LOW,EXPERT_OPINION"
+      confidence_threshold: ${CLINICAL_DECISION_CONFIDENCE:0.6}
+
+    differential_diagnosis:
+      enabled: ${DIFFERENTIAL_DIAGNOSIS_AI_ENABLED:true}
+      max_diagnoses: ${MAX_DIFFERENTIAL_DIAGNOSES:10}
+      likelihood_threshold: ${DIAGNOSIS_LIKELIHOOD_THRESHOLD:0.3}
 
 # ---------------------------
-# Google Gemini Configuration
+# Enhanced Google Gemini Configuration
 # ---------------------------
 gemini:
   api:
     key: ${GEMINI_API_KEY:AIzaSyAfUL5Jof5GuPsEGYVoqNvd8N8huMMfX-Q}
   model: ${GEMINI_MODEL:gemini-pro}
+  medical:
+    temperature: ${GEMINI_TEMPERATURE:0.3}  # Lower for medical accuracy
+    max-tokens: ${GEMINI_MAX_TOKENS:2000}  # Longer for detailed responses
+    top-p: ${GEMINI_TOP_P:0.8}
+    top-k: ${GEMINI_TOP_K:40}
 
 # ---------------------------
 # Ollama Configuration
@@ -157,17 +286,17 @@ ollama:
   model: ${OLLAMA_MODEL:medalpaca}
 
 # ---------------------------
-# OpenAI Configuration
+# Enhanced OpenAI Configuration
 # ---------------------------
 openai:
   api:
     key: ${OPENAI_API_KEY:dummy-dev-key}
-  model: ${OPENAI_MODEL:gpt-3.5-turbo}
+  model: ${OPENAI_MODEL:gpt-4-turbo}
   max:
-    tokens: ${OPENAI_MAX_TOKENS:1000}
+    tokens: ${OPENAI_MAX_TOKENS:2000}
 
 # ---------------------------
-# PubMed API Configuration
+# Enhanced PubMed API Configuration
 # ---------------------------
 pubmed:
   api:
@@ -175,23 +304,147 @@ pubmed:
       url: https://eutils.ncbi.nlm.nih.gov/entrez/eutils
     key: ${PUBMED_API_KEY:30db509f39b65180d2fec965ecf71e55dc09}
   max:
-    results: ${PUBMED_MAX_RESULTS:10}
+    results: ${PUBMED_MAX_RESULTS:20}
   cache:
     ttl:
       hours: ${PUBMED_CACHE_TTL:24}
   summary:
     max:
-      length: ${PUBMED_SUMMARY_MAX_LENGTH:500}
+      length: ${PUBMED_SUMMARY_MAX_LENGTH:800}
+  enhanced:
+    summaries:
+      enabled: ${PUBMED_ENHANCED_SUMMARIES:true}
+    relevance:
+      scoring: ${PUBMED_RELEVANCE_SCORING:true}
 
 # ---------------------------
-# Rate Limiting
+# Drug Interaction Configuration
+# ---------------------------
+drug:
+  interaction:
+    enabled: ${DRUG_INTERACTION_ENABLED:true}
+    cache:
+      ttl: ${DRUG_INTERACTION_CACHE_TTL:86400}  # 24 hours
+    severity:
+      levels: "MAJOR,MODERATE,MINOR"
+    sources:
+      rxnav: "https://rxnav.nlm.nih.gov/REST"
+      drugbank: "https://api.drugbank.com"
+    analysis:
+      timeout: ${DRUG_INTERACTION_TIMEOUT:30}
+      max_medications: ${MAX_MEDICATIONS_CHECK:10}
+
+# ---------------------------
+# Clinical Decision Support Configuration
+# ---------------------------
+clinical:
+  decision:
+    support:
+      enabled: ${CDS_ENABLED:true}
+    guidelines:
+      sources: "WHO,CDC,NICE,AHA,ESC,ACCP,IDSA"
+    risk:
+      calculators: "ASCVD,CHA2DS2-VASc,CHADS2,GRACE,CURB65,qSOFA"
+    analysis:
+      timeout: ${CDS_TIMEOUT:45}
+      max_complexity: ${CDS_MAX_COMPLEXITY:10}
+
+# ---------------------------
+# Differential Diagnosis Configuration
+# ---------------------------
+differential:
+  diagnosis:
+    enabled: ${DIFFERENTIAL_DIAGNOSIS_ENABLED:true}
+    max_diagnoses: ${MAX_DIFFERENTIAL_DIAGNOSES:15}
+    confidence_threshold: ${DIAGNOSIS_CONFIDENCE_THRESHOLD:0.4}
+    specialties:
+      - CARDIOLOGY
+      - NEUROLOGY
+      - EMERGENCY
+      - INTERNAL
+      - FAMILY
+      - PEDIATRICS
+      - GERIATRICS
+
+# ---------------------------
+# Medical Guidelines Configuration
+# ---------------------------
+medical:
+  guidelines:
+    enabled: ${MEDICAL_GUIDELINES_ENABLED:true}
+    sources:
+      - organization: "WHO"
+        priority: 1
+      - organization: "CDC"
+        priority: 2
+      - organization: "NICE"
+        priority: 3
+      - organization: "AHA"
+        priority: 4
+      - organization: "ESC"
+        priority: 5
+    cache:
+      ttl: ${GUIDELINES_CACHE_TTL:172800}  # 48 hours
+
+# ---------------------------
+# Risk Calculator Configuration
+# ---------------------------
+risk:
+  calculators:
+    enabled: ${RISK_CALCULATORS_ENABLED:true}
+    available:
+      cardiology:
+        - "ASCVD Risk Calculator"
+        - "CHADS2 Score"
+        - "CHA2DS2-VASc Score"
+        - "GRACE Score"
+        - "TIMI Risk Score"
+        - "Framingham Risk Score"
+      neurology:
+        - "NIHSS (NIH Stroke Scale)"
+        - "ABCD2 Score"
+        - "ICH Score"
+        - "Hunt and Hess Scale"
+      emergency:
+        - "qSOFA Score"
+        - "SOFA Score"
+        - "APACHE II Score"
+        - "Glasgow Coma Scale"
+        - "CURB-65 Score"
+      general:
+        - "BMI Calculator"
+        - "eGFR Calculator"
+        - "Creatinine Clearance"
+        - "Body Surface Area"
+
+# ---------------------------
+# Enhanced Rate Limiting
 # ---------------------------
 rate:
   limit:
     requests:
       per:
-        minute: ${RATE_LIMIT_RPM:30}
+        minute: ${RATE_LIMIT_RPM:60}
+        hour: ${RATE_LIMIT_RPH:500}
     enabled: ${RATE_LIMIT_ENABLED:true}
+    burst:
+      capacity: ${RATE_LIMIT_BURST:10}
+
+# ---------------------------
+# Medical Analytics Configuration
+# ---------------------------
+analytics:
+  medical:
+    enabled: ${MEDICAL_ANALYTICS_ENABLED:true}
+    usage:
+      tracking: ${USAGE_TRACKING_ENABLED:true}
+      retention_days: ${ANALYTICS_RETENTION_DAYS:90}
+    accuracy:
+      monitoring: ${ACCURACY_MONITORING_ENABLED:true}
+      feedback_weight: ${FEEDBACK_WEIGHT:0.7}
+    performance:
+      monitoring: ${PERFORMANCE_MONITORING_ENABLED:true}
+      slow_query_threshold: ${SLOW_QUERY_THRESHOLD:5000}  # milliseconds
 
 # ---------------------------
 # Development Mode
@@ -200,19 +453,32 @@ dev:
   mode: ${DEV_MODE:false}
 
 # ---------------------------
-# Management/Actuator
+# Enhanced Management/Actuator
 # ---------------------------
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info,metrics,prometheus
   endpoint:
     health:
       show-details: when-authorized
   health:
     defaults:
       enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: ${PROMETHEUS_ENABLED:true}
+
+# ---------------------------
+# CORS Configuration
+# ---------------------------
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,https://cabinet360.com}
+  allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+  allowed-headers: "*"
+  allow-credentials: true
 
 ---
 # ==========================================
@@ -223,10 +489,14 @@ spring:
     activate:
       on-profile: dev
 
+  # Development Database
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5434}/${DB_NAME:ai_service_db}
+
   # Development JPA
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: true
 
 # Development Logging
@@ -236,6 +506,52 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
     com.cabinet360.ai: DEBUG
     root: DEBUG
+
+# Development AI Settings
+ai:
+  medical:
+    system:
+      prompt: |
+        [DEVELOPMENT MODE] You are a medical AI assistant in development mode.
+        Provide evidence-based medical information but include [DEV] tags in responses.
+        Always include safety disclaimers and development warnings.
+        
+        🔍 CLINICAL ASSESSMENT: [DEV MODE]
+        - Analyze the clinical presentation
+        - Consider relevant pathophysiology
+        - Identify key clinical features
+        
+        🎯 DIFFERENTIAL CONSIDERATIONS: [DEV MODE]
+        - List possible diagnoses with likelihood
+        - Explain supporting/distinguishing features
+        - Consider common and serious conditions
+        
+        💊 MANAGEMENT OPTIONS: [DEV MODE]
+        - Evidence-based recommendations
+        - Consider contraindications
+        - Include monitoring parameters
+        
+        ⚠️ SAFETY: [DEV MODE]
+        - Identify red flags
+        - Emergency referral criteria
+        - Patient safety considerations
+        
+        Always remind users this is for development/testing purposes only.
+
+# Development-specific settings
+drug:
+  interaction:
+    enabled: true
+    cache:
+      ttl: 300  # 5 minutes for testing
+
+clinical:
+  decision:
+    support:
+      enabled: true
+
+dev:
+  mode: true
 
 ---
 # ==========================================
@@ -267,3 +583,104 @@ logging:
     root: WARN
   file:
     name: /var/log/cabinet360/ai-service.log
+
+# Production AI Settings
+ai:
+  timeout:
+    seconds: 45
+  retry:
+    max-attempts: 2
+  medical:
+    system:
+      prompt: |
+        You are an advanced medical AI assistant for healthcare professionals.
+        Provide evidence-based medical information with clinical reasoning.
+        Always include appropriate safety disclaimers and recommend consulting 
+        healthcare professionals for definitive medical decisions.
+        
+        🔍 CLINICAL ASSESSMENT:
+        - Comprehensive clinical analysis
+        - Evidence-based reasoning
+        - Risk stratification
+        
+        🎯 DIFFERENTIAL DIAGNOSIS:
+        - Systematic approach to diagnosis
+        - Evidence-based likelihood assessment
+        - Clinical decision rules when applicable
+        
+        💊 TREATMENT RECOMMENDATIONS:
+        - Current guideline-based management
+        - Patient-specific considerations
+        - Monitoring and follow-up plans
+        
+        ⚠️ SAFETY & QUALITY:
+        - Patient safety paramount
+        - Quality improvement considerations
+        - Professional consultation recommendations
+
+# Production-specific settings
+rate:
+  limit:
+    requests:
+      per:
+        minute: 120
+        hour: 1000
+
+analytics:
+  medical:
+    usage:
+      retention_days: 365
+
+dev:
+  mode: false
+
+---
+# ==========================================
+# TESTING PROFILE
+# ==========================================
+spring:
+  config:
+    activate:
+      on-profile: test
+
+  # Test Database
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+
+  # Test JPA
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+
+# Test Logging
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    com.cabinet360.ai: DEBUG
+    root: WARN
+
+# Test AI Settings (disabled for unit tests)
+ai:
+  provider: mock
+  medical:
+    drug_interaction:
+      enabled: false
+    clinical_decision:
+      enabled: false
+
+# Test-specific settings
+drug:
+  interaction:
+    enabled: false
+
+clinical:
+  decision:
+    support:
+      enabled: false
+
+dev:
+  mode: true
